@@ -26,8 +26,7 @@ npm-debug.log*
 # vercel
 .vercel
 
-# editor / tooling
+# editor / local leftovers
 .vscode/
 .idea/
 AGENTS.md
-CLAUDE.md

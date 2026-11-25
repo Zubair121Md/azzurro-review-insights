@@ -84,7 +84,7 @@ Retries use exponential backoff for timeouts, 5xx, and temporary blocks. A bot c
 
 ### Reliability and limits
 
-- **Terms of use.** Booking.com’s terms restrict automated access. This collector is for a short trial / internal ops view of *your own* properties’ public reviews. For production, prefer the Booking.com extranet export or a partner review API (e.g. ReviewPro, TrustYou, Revinate).
+- **Terms of use.** Booking.com’s terms restrict automated access. This collector is meant for an internal ops view of your own properties’ public reviews. For ongoing production use, prefer the Booking.com extranet export or a partner review API (e.g. ReviewPro, TrustYou, Revinate).
 - **Bot challenges.** Datacenter IPs (including GitHub Actions) may get challenged more often than a residential connection. The headed browser path usually clears the first challenge; if a run fails with `BlockedError`, re-run locally or from a less blocked network.
 - **Page / API changes.** If Booking renames fields or rotates the persisted-query hash, the Zod parser or request capture fails loudly (`LayoutChangedError`) instead of writing bad data.
 - **History window.** Booking typically exposes roughly the last few years of reviews. Guests can edit or remove reviews between runs.
