@@ -32,6 +32,7 @@ export interface FeedFilter {
   sentiment: Sentiment | "all";
   topic: TopicId | null;
   search: string;
+  needsReply: boolean;
 }
 
 const PRESET_IDS = new Set<string>([...PRESETS.map((p) => p.id), "custom"]);
@@ -54,9 +55,10 @@ export function Dashboard() {
   const [property, setProperty] = useState<PropertyFilter>("all");
   const [preset, setPreset] = useState<PresetId>("this-week");
   const [custom, setCustom] = useState<{ from: string; to: string } | undefined>();
-  const [feed, setFeed] = useState<FeedFilter>({ sentiment: "all", topic: null, search: "" });
+  const [feed, setFeed] = useState<FeedFilter>({ sentiment: "all", topic: null, search: "", needsReply: false });
   const [showMethod, setShowMethod] = useState(false);
   const [today, setToday] = useState<string | null>(null);
+  const [loadedAt, setLoadedAt] = useState<number | null>(null);
 
   useEffect(() => {
     fetch("/data/reviews.json")
@@ -72,7 +74,9 @@ export function Dashboard() {
           setPreset(s.preset);
           if (s.from && s.to) setCustom({ from: s.from, to: s.to });
         }
-        setToday(sydneyDay(new Date()));
+        const now = new Date();
+        setToday(sydneyDay(now));
+        setLoadedAt(now.getTime());
         setSnapshot(data);
       })
       .catch((e: Error) => setError(e.message));
@@ -121,7 +125,7 @@ export function Dashboard() {
     <div className="min-h-screen">
       <section className="hero-bg pb-28 text-white">
         <div className="mx-auto max-w-7xl px-4 pt-6 sm:px-6 lg:px-8">
-          <Header snapshot={snapshot} onOpenMethod={() => setShowMethod(true)} />
+          <Header snapshot={snapshot} now={loadedAt} onOpenMethod={() => setShowMethod(true)} />
           <FilterBar
             properties={snapshot?.properties ?? []}
             property={property}
@@ -156,6 +160,10 @@ export function Dashboard() {
                 period={view.period}
                 onTopic={selectTopic}
                 onProperty={(id) => setProperty(id)}
+                onNeedsReply={() => {
+                  setFeed((f) => ({ ...f, needsReply: true, topic: null, sentiment: "all" }));
+                  document.getElementById("reviews")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                }}
                 className="lg:col-span-2"
               />
               <SentimentMix reviews={view.current} period={view.period} />

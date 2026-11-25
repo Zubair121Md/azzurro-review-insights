@@ -99,15 +99,26 @@ Retries use exponential backoff for timeouts, 5xx, and temporary blocks. A bot c
 | Topic | What it covers |
 | --- | --- |
 | Cleanliness | Dirt, smells, pests, housekeeping |
-| Check-in & access | Arrival, keys, codes, instructions |
+| Check-in & access | Arrival, keys, codes, remote/video check-in, luggage |
 | Staff & reception | Service, attitude, front desk |
-| Noise | Thin walls, street noise, parties |
-| Facilities | Bathroom, Wi‑Fi, air‑con, lift, amenities |
+| Noise | Thin walls, street noise, parties, squeaky beds |
+| Facilities | Bathrooms, Wi‑Fi, air‑con, kitchen, lift, amenities |
+| Food & breakfast | Included breakfast/dinner, coffee, dietary options |
 | Location | Neighbourhood, transport, safety |
-| Room condition | Size, bed, linen, maintenance |
-| Value | Price, fees, “worth it” |
+| Room condition | Size, beds, linen, windows, maintenance |
+| Value | Price, fees, deposits, “worth it” |
 
-A review counts toward a **complaint** topic when the dislike box matches (or, if empty on a negative review, the headline). **Praise** topics come from the like box. One review can hit several topics, so shares do not add to 100%. Non-English text is still scored, but topic keywords will usually miss it. Negation/sarcasm is a known limit of keyword matching; using the like/dislike split removes most of the noise.
+Food & breakfast isn’t in the original topic list, but it came up constantly in the negative reviews (several properties include breakfast or dinner) and was inflating “Facilities”, so it has its own bucket.
+
+A review counts toward a **complaint** topic when the dislike box matches (or, if a negative review leaves it empty, the headline). **Praise** topics come from the like box. One review can hit several topics, so shares do not add to 100%.
+
+**Why keywords and not an AI model?** The split between “liked” and “didn’t like” already tells us the polarity, so the only job left is “what is this about”. Keywords do that transparently: an ops manager can open the list, see why a review was tagged, and suggest a new word. It costs nothing to run, gives the same answer every time, and needs no API key. An LLM classifier would handle negation and paraphrase better and would be the next step if the numbers start driving decisions (see *Next steps*).
+
+**Languages.** About 29% of reviews are not in English (Booking tags many English reviews as `xu`, which is treated as English). Keywords exist for English, French, Spanish, German and Italian, which together cover 88% of reviews (foreign keywords are only applied to reviews Booking tags with that language, so English words like “personal” don’t misfire). On the current data, 93% of English negative reviews with a written complaint match at least one topic, and 73% of non‑English ones. Chinese, Japanese and Korean reviews are scored but mostly not topic‑tagged.
+
+**Known limits.** No negation or sarcasm handling (“not noisy at all” in the dislikes box still counts as noise). Long, angry reviews tend to hit many topics. Weekly numbers per property are small (often under 10 reviews), so the dashboard flags low samples instead of hiding them.
+
+**How it was checked.** Unit tests cover the tricky cases (whole-word matching, “nothing / none” answers, foreign-language keywords, headline fallback). I also spot-checked random samples of real English and non-English reviews against their tags and tuned the lists from what was wrong (for example, “room 25” was being tagged as room condition and “queue for the toilets” as check-in). The **Method & limits** drawer shows live coverage numbers.
 
 Weeks are Monday–Sunday in `Australia/Sydney`. “This week” is Mon → today, compared with the whole of last week. Periods with fewer than 5 reviews show a small-sample warning.
 
@@ -118,7 +129,11 @@ Weeks are Monday–Sunday in `Australia/Sydney`. “This week” is Mon → toda
 - Plain-English “what guests are saying” insights
 - Per-property cards with Booking category scores and a 12-week sparkline
 - Sentiment and topic trend charts
-- Review feed with search, sentiment/topic filters, keyword highlighting, hotel replies
+- Review feed with search, sentiment/topic filters, keyword highlighting and hotel replies
+- “Needs reply” view: negative reviews the hotel hasn’t answered on Booking.com yet
+- CSV download of whatever the feed is currently showing
+- Data quality panel: reviews collected vs the total Booking.com lists, topic coverage by language, last run status
+- Warning in the header if the data is more than 48 hours old
 
 Open **Method & limits** in the header for the same explanation inside the app.
 
@@ -162,3 +177,10 @@ data/sample/          committed CSV sample
 public/data/          committed JSON snapshot
 tests/                vitest + GraphQL fixture
 ```
+
+## Next steps
+
+- Replace scraping with the Booking.com extranet export or a review partner API once access is available.
+- Optional LLM pass for topic tagging on reviews the keywords miss, with the keyword result kept as a fallback.
+- Email/Slack digest every Monday with last week’s numbers and unanswered negative reviews.
+- Add Google and TripAdvisor reviews through the same storage and dashboard.

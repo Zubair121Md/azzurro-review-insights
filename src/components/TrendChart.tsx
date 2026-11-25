@@ -24,6 +24,7 @@ export const TOPIC_COLORS: Record<TopicId, string> = {
   staff: "#0ea5e9",
   noise: "#f59e0b",
   facilities: "#14b8a6",
+  food: "#a16207",
   location: "#22c55e",
   room: "#6366f1",
   value: "#ec4899",

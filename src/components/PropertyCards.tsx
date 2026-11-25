@@ -50,6 +50,8 @@ export function PropertyCards({
           ).points.map((pt) => ({ k: pt.key, v: pt.average }));
           const subs = SUBSCORE_ORDER.map((k) => p.subscores.find((s) => s.key === k)).filter(Boolean) as PropertySnapshot["subscores"];
           const active = selected === p.id;
+          const negatives = bp.reviews.filter((r) => r.sentiment === "negative");
+          const replied = negatives.filter((r) => r.hotelReply).length;
 
           return (
             <article
@@ -108,13 +110,17 @@ export function PropertyCards({
                 </div>
               </div>
 
-              <dl className="mt-4 grid grid-cols-2 gap-2 text-xs">
+              <dl className="mt-4 grid grid-cols-3 gap-2 text-xs">
                 <div className="rounded-lg bg-slate-50 px-2.5 py-2">
                   <dt className="text-slate-500">Negative</dt>
                   <dd className="tabular font-semibold text-slate-800">{fmt.pct(cur.negativeShare)}</dd>
                 </div>
+                <div className="rounded-lg bg-slate-50 px-2.5 py-2" title="Negative reviews the hotel has replied to on Booking.com">
+                  <dt className="text-slate-500">Replied</dt>
+                  <dd className="tabular font-semibold text-slate-800">{negatives.length ? `${replied}/${negatives.length}` : "–"}</dd>
+                </div>
                 <div className="rounded-lg bg-slate-50 px-2.5 py-2">
-                  <dt className="text-slate-500">Most raised issue</dt>
+                  <dt className="text-slate-500">Top issue</dt>
                   <dd className="truncate font-semibold text-slate-800">{issue ? issue.label : "–"}</dd>
                 </div>
               </dl>

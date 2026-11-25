@@ -2,6 +2,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
 import { bookingUrl, PROPERTIES, PROPERTY_BY_ID, type PropertyId } from "../src/lib/properties";
 import { sentimentForScore } from "../src/lib/sentiment";
+import { reviewsToCsv } from "../src/lib/csv";
 import { classifyReview } from "../src/lib/topics";
 import type { PropertySnapshot, Review, Snapshot, StoredReview, Subscore } from "../src/lib/types";
 import type { ReviewStore } from "./db";
@@ -39,29 +40,12 @@ export function buildSnapshot(store: ReviewStore): Snapshot {
   };
 }
 
-const csvCell = (v: unknown) => {
-  if (v === null || v === undefined) return "";
-  const s = Array.isArray(v) ? v.join("|") : String(v);
-  return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
-};
-
-export function toCsv(reviews: Review[]): string {
-  const cols: (keyof Review)[] = [
-    "propertyId", "reviewId", "reviewedAt", "score", "sentiment", "title", "liked", "disliked", "issues", "praise",
-    "checkIn", "checkOut", "nights", "roomName", "travellerType", "guestName", "guestCountry", "language",
-    "hotelReply", "helpfulVotes",
-  ];
-  const lines = [cols.join(",")];
-  for (const r of reviews) lines.push(cols.map((c) => csvCell(r[c])).join(","));
-  return lines.join("\n") + "\n";
-}
-
 export function exportSnapshot(store: ReviewStore) {
   const snapshot = buildSnapshot(store);
   for (const path of [SNAPSHOT_PATH, CSV_PATH]) mkdirSync(dirname(path), { recursive: true });
   // Null fields are dropped to keep the file the dashboard downloads small.
   writeFileSync(SNAPSHOT_PATH, JSON.stringify(snapshot, (_k, v) => (v === null ? undefined : v)));
-  writeFileSync(CSV_PATH, toCsv(snapshot.reviews));
+  writeFileSync(CSV_PATH, reviewsToCsv(snapshot.reviews));
   return { reviews: snapshot.reviews.length, paths: [SNAPSHOT_PATH, CSV_PATH] };
 }
 

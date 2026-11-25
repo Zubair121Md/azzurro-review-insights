@@ -16,12 +16,14 @@ export function InsightsPanel({
   period,
   onTopic,
   onProperty,
+  onNeedsReply,
   className,
 }: {
   insights: Insight[];
   period: Period;
   onTopic: (t: TopicId) => void;
   onProperty: (p: PropertyId) => void;
+  onNeedsReply: () => void;
   className?: string;
 }) {
   return (
@@ -38,7 +40,13 @@ export function InsightsPanel({
         {insights.map((ins, i) => {
           const t = TONE[ins.tone];
           const Icon = t.icon;
-          const action = ins.topic ? () => onTopic(ins.topic!) : ins.propertyId ? () => onProperty(ins.propertyId!) : undefined;
+          const action = ins.topic
+            ? () => onTopic(ins.topic!)
+            : ins.needsReply
+              ? onNeedsReply
+              : ins.propertyId
+                ? () => onProperty(ins.propertyId!)
+                : undefined;
           return (
             <li key={i} className="group flex items-start gap-3">
               <span className={clsx("mt-0.5 grid size-6 shrink-0 place-items-center rounded-full", t.cls)}>
@@ -52,7 +60,7 @@ export function InsightsPanel({
                     onClick={action}
                     className="ml-1.5 inline-flex items-center text-sm font-medium text-azure-600 opacity-80 hover:underline group-hover:opacity-100"
                   >
-                    {ins.topic ? "See reviews" : "Focus"}
+                    {ins.topic ? "See reviews" : ins.needsReply ? "Show them" : "Focus"}
                     <ArrowUpRight className="size-3.5" />
                   </button>
                 )}

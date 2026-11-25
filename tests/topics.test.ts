@@ -28,6 +28,39 @@ describe("detectTopics", () => {
     expect(isTrivial("Nothing really.")).toBe(true);
     expect(detectTopics("Nothing at all")).toEqual([]);
     expect(isTrivial("Nothing worked in the room")).toBe(false);
+    expect(isTrivial("None everything was clean and perfect")).toBe(true);
+    expect(isTrivial("Rien")).toBe(true);
+  });
+
+  it("doesn't tag a topic just because a room is mentioned", () => {
+    expect(detectTopics("We were moved to room 25 and the shower was cold")).toEqual(["facilities"]);
+    expect(detectTopics("No desk to work at")).not.toContain("staff");
+    expect(detectTopics("Long queue for the toilets")).toEqual(["facilities"]);
+  });
+
+  it("separates food from facilities", () => {
+    expect(detectTopics("Breakfast was only toast and cereal")).toEqual(["food"]);
+    expect(detectTopics("Dinner ran out and the kitchen was dirty")).toEqual(["cleanliness", "facilities", "food"]);
+  });
+});
+
+describe("other languages", () => {
+  it.each([
+    ["fr", "L'auberge est extrêmement sale, il y a des cafards", ["cleanliness"]],
+    ["es", "No había personal en recepción, solo una asistente remota", ["staff"]],
+    ["de", "Sehr laut und die Dusche war kaputt", ["noise", "facilities", "room"]],
+    ["it", "Bagno sporco e colazione scarsa", ["cleanliness", "facilities", "food"]],
+  ])("%s: %s", (lang, text, expected) => {
+    expect(detectTopics(text, lang)).toEqual(expected);
+  });
+
+  it("only uses foreign keywords for reviews in that language", () => {
+    expect(detectTopics("Personal space was limited", "en")).toEqual(["room"]);
+    expect(detectTopics("Personal space was limited", "es")).toContain("staff");
+  });
+
+  it("treats Booking's 'xu' code as English", () => {
+    expect(detectTopics("personal", "xu")).toEqual([]);
   });
 });
 
@@ -39,7 +72,7 @@ describe("classifyReview", () => {
   });
 
   it("falls back to a negative review's headline when the disliked box is empty", () => {
-    expect(classifyReview({ score: 3, title: "Filthy room", liked: null, disliked: "Nothing" }).issues).toEqual(["cleanliness", "room"]);
+    expect(classifyReview({ score: 3, title: "Filthy room, broken bed", liked: null, disliked: "Nothing" }).issues).toEqual(["cleanliness", "room"]);
   });
 
   it("only treats the headline as a complaint for negative reviews", () => {

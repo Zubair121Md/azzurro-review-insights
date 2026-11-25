@@ -2,12 +2,14 @@ import { BookOpenText, RefreshCw } from "lucide-react";
 import { formatDateTime, relativeTime } from "@/lib/dates";
 import type { Snapshot } from "@/lib/types";
 
-export function Header({ snapshot, onOpenMethod }: { snapshot: Snapshot | null; onOpenMethod: () => void }) {
+export function Header({ snapshot, now, onOpenMethod }: { snapshot: Snapshot | null; now: number | null; onOpenMethod: () => void }) {
   const lastScrape = snapshot?.properties
     .map((p) => p.lastScrapedAt)
     .filter((d): d is string => !!d)
     .sort()
     .at(-1);
+  // Collection is meant to run daily; older data than this means the job has stopped.
+  const stale = !!lastScrape && !!now && now - new Date(lastScrape).getTime() > 48 * 3_600_000;
   const failing = snapshot?.runs.filter((r, i, all) => all.findIndex((x) => x.propertyId === r.propertyId) === i && r.status === "failed") ?? [];
 
   return (
@@ -28,14 +30,15 @@ export function Header({ snapshot, onOpenMethod }: { snapshot: Snapshot | null; 
             className="glass inline-flex items-center gap-2 px-3 py-1.5 text-white/80"
             title={lastScrape ? `Last collected ${formatDateTime(lastScrape)} (Sydney time)` : undefined}
           >
-            <span className={`size-2 rounded-full ${failing.length ? "bg-amber-400" : "bg-emerald-400"} shadow-[0_0_0_3px_rgba(16,185,129,0.15)]`} />
+            <span className={`size-2 rounded-full ${failing.length || stale ? "bg-amber-400" : "bg-emerald-400"} shadow-[0_0_0_3px_rgba(16,185,129,0.15)]`} />
             {snapshot.reviews.length.toLocaleString("en-AU")} reviews
             {lastScrape && (
               <>
                 <span className="text-white/30">·</span>
-                <RefreshCw className="size-3.5" /> updated {relativeTime(lastScrape)}
+                <RefreshCw className="size-3.5" /> updated {relativeTime(lastScrape, now ?? undefined)}
               </>
             )}
+            {stale && <span className="text-amber-300">· data may be out of date</span>}
             {failing.length > 0 && <span className="text-amber-300">· {failing.length} source issue{failing.length > 1 ? "s" : ""}</span>}
           </span>
         )}

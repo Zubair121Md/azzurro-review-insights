@@ -2,8 +2,8 @@
 
 import clsx from "clsx";
 import { X } from "lucide-react";
-import { useEffect } from "react";
-import { LOW_SAMPLE } from "@/lib/analytics";
+import { useEffect, useMemo } from "react";
+import { dataQuality, LOW_SAMPLE } from "@/lib/analytics";
 import { formatDateTime } from "@/lib/dates";
 import { PROPERTY_BY_ID, type PropertyId } from "@/lib/properties";
 import { TOPICS } from "@/lib/topics";
@@ -17,6 +17,8 @@ export function Methodology({ open, onClose, snapshot }: { open: boolean; onClos
     return () => window.removeEventListener("keydown", onKey);
   }, [open, onClose]);
 
+  const quality = useMemo(() => (snapshot ? dataQuality(snapshot.reviews, snapshot.properties) : null), [snapshot]);
+  const pct = (v: number | null) => (v == null ? "–" : `${Math.round(v * 100)}%`);
   const latestRuns = snapshot?.runs.filter((r, i, all) => all.findIndex((x) => x.propertyId === r.propertyId) === i) ?? [];
 
   return (
@@ -62,6 +64,10 @@ export function Methodology({ open, onClose, snapshot }: { open: boolean; onClos
               like&rdquo; box empty, its headline is used instead. One review can mention several topics.
             </p>
             <p className="mt-2">
+              Keywords exist in English plus French, Spanish, German and Italian, which together cover most reviews. Reviews in
+              other languages (mainly Chinese, Japanese and Korean) still count toward scores, but usually not toward topics.
+            </p>
+            <p className="mt-2">
               &ldquo;40% of negative reviews mentioned cleanliness&rdquo; means: of all reviews scored below 6 in the period, 40% had
               a cleanliness keyword in what the guest didn&apos;t like.
             </p>
@@ -73,6 +79,7 @@ export function Methodology({ open, onClose, snapshot }: { open: boolean; onClos
                     <dt className="font-medium text-slate-800">{t.label}</dt>
                     <dd className="font-mono text-xs text-slate-500">
                       {t.patterns.map((p) => p.replace(/\\w\*/g, "…").replace(/\\/g, "").replace(/\?/g, "")).join(", ")}
+                      <span className="text-slate-400"> + {t.translations.length} French/Spanish/German/Italian terms</span>
                     </dd>
                   </div>
                 ))}
@@ -90,7 +97,14 @@ export function Methodology({ open, onClose, snapshot }: { open: boolean; onClos
                 Keyword matching does not understand negation or sarcasm (&ldquo;not noisy at all&rdquo; in the dislikes box still
                 counts as noise). Using the liked/disliked split removes most of this, but not all.
               </li>
-              <li>Reviews not written in English are scored and counted, but their topics will usually be missed.</li>
+              <li>
+                Reviews in languages other than English, French, Spanish, German and Italian are scored and counted, but their
+                topics will usually be missed.
+              </li>
+              <li>
+                Praise written in the dislikes box (&ldquo;nothing, staff were lovely&rdquo;) can still be counted as a complaint.
+                Common &ldquo;nothing / none&rdquo; answers are filtered out.
+              </li>
               <li>
                 Booking.com only shows roughly the last three years of reviews, and guests can edit or remove reviews, so history
                 may change slightly between runs.
@@ -98,6 +112,42 @@ export function Methodology({ open, onClose, snapshot }: { open: boolean; onClos
               <li>The data is as fresh as the last collection run (shown in the header), not live.</li>
             </ul>
           </Block>
+
+          {quality && (
+            <Block title="Data quality">
+              <table className="w-full text-left text-xs">
+                <thead className="text-slate-400">
+                  <tr>
+                    <th className="py-1 font-medium">Property</th>
+                    <th className="py-1 text-right font-medium">Collected</th>
+                    <th className="py-1 text-right font-medium">On Booking.com</th>
+                    <th className="py-1 text-right font-medium">Coverage</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {quality.coverage.map((c) => (
+                    <tr key={c.propertyId}>
+                      <td className="py-1.5 text-slate-700">{PROPERTY_BY_ID[c.propertyId]?.shortName}</td>
+                      <td className="tabular py-1.5 text-right">{c.stored.toLocaleString("en-AU")}</td>
+                      <td className="tabular py-1.5 text-right">{c.listed?.toLocaleString("en-AU") ?? "–"}</td>
+                      <td className="tabular py-1.5 text-right font-medium text-slate-800">
+                        {c.listed ? pct(Math.min(1, c.stored / c.listed)) : "–"}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <ul className="mt-3 list-disc space-y-1 pl-5 text-xs">
+                <li>{pct(quality.englishShare)} of reviews are written in English.</li>
+                <li>
+                  Negative reviews with a written complaint that matched at least one topic: {pct(quality.topicCoverage.english)} in
+                  English ({quality.topicCoverage.englishCount.toLocaleString("en-AU")}), {pct(quality.topicCoverage.other)} in
+                  other languages ({quality.topicCoverage.otherCount.toLocaleString("en-AU")}).
+                </li>
+                <li>{quality.withoutText.toLocaleString("en-AU")} reviews have a score but no written comments.</li>
+              </ul>
+            </Block>
+          )}
 
           {latestRuns.length > 0 && (
             <Block title="Last collection run">

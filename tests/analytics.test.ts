@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildInsights, inRange, resolvePeriod, stats, topicStats, trend } from "../src/lib/analytics";
+import { buildInsights, dataQuality, inRange, resolvePeriod, stats, topicStats, trend } from "../src/lib/analytics";
 import { sydneyDay, weekStart } from "../src/lib/dates";
 import { sentimentForScore } from "../src/lib/sentiment";
 import { classifyReview } from "../src/lib/topics";
@@ -102,5 +102,26 @@ describe("stats and topics", () => {
     expect(t.unit).toBe("week");
     expect(t.points.at(-1)).toMatchObject({ key: "2026-11-23", count: 6 });
     expect(t.points.length).toBeGreaterThanOrEqual(12);
+  });
+});
+
+describe("dataQuality", () => {
+  it("reports coverage against Booking's own count and topic hit rates", () => {
+    const rs = [
+      review("2026-11-20T01:00:00Z", 3, "Dirty floors"),
+      review("2026-11-20T02:00:00Z", 4, "Il manque quelque chose"),
+      review("2026-11-20T03:00:00Z", 9, null, "Great"),
+    ];
+    rs[1].language = "fr";
+    const q = dataQuality(rs, [{ id: "potts-point", bookingReviewCount: 4 }]);
+    expect(q.coverage[0]).toEqual({ propertyId: "potts-point", stored: 3, listed: 4 });
+    expect(q.topicCoverage).toMatchObject({ english: 1, other: 0, englishCount: 1, otherCount: 1 });
+  });
+
+  it("points out negative reviews without a hotel reply", () => {
+    const rs = [review("2026-11-24T01:00:00Z", 3, "Dirty"), review("2026-11-24T02:00:00Z", 2, "Rude staff")];
+    rs[1].hotelReply = "Sorry to hear this";
+    const insights = buildInsights(rs, [], resolvePeriod("this-week", "2026-11-25"));
+    expect(insights.find((i) => i.needsReply)?.text).toBe("1 of 2 negative reviews this week has no reply from the hotel on Booking.com yet.");
   });
 });

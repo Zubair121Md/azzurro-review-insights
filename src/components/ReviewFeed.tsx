@@ -1,11 +1,12 @@
 "use client";
 
 import clsx from "clsx";
-import { ArrowDownWideNarrow, Frown, Languages, MessageCircleReply, Search, Smile, X } from "lucide-react";
+import { ArrowDownWideNarrow, Download, Frown, Languages, MessageCircleReply, MessageSquareWarning, Search, Smile, X } from "lucide-react";
 import { useDeferredValue, useMemo, useState } from "react";
 import type { Period } from "@/lib/analytics";
 import { formatDay, sydneyDay } from "@/lib/dates";
-import { highlightTopics, TOPIC_BY_ID, type TopicId } from "@/lib/topics";
+import { reviewsToCsv } from "@/lib/csv";
+import { highlightTopics, isEnglish, TOPIC_BY_ID, type TopicId } from "@/lib/topics";
 import type { PropertySnapshot, Review, Sentiment } from "@/lib/types";
 import type { FeedFilter } from "./Dashboard";
 import { TOPIC_COLORS } from "./TrendChart";
@@ -37,14 +38,18 @@ export function ReviewFeed({
   const props = useMemo(() => new Map(properties.map((p) => [p.id, p])), [properties]);
 
   const counts = useMemo(() => {
-    const c = { all: reviews.length, positive: 0, neutral: 0, negative: 0 };
-    for (const r of reviews) c[r.sentiment]++;
+    const c = { all: reviews.length, positive: 0, neutral: 0, negative: 0, needsReply: 0 };
+    for (const r of reviews) {
+      c[r.sentiment]++;
+      if (r.sentiment === "negative" && !r.hotelReply) c.needsReply++;
+    }
     return c;
   }, [reviews]);
 
   const shown = useMemo(() => {
     const out = reviews.filter((r) => {
       if (filter.sentiment !== "all" && r.sentiment !== filter.sentiment) return false;
+      if (filter.needsReply && (r.sentiment !== "negative" || r.hotelReply)) return false;
       if (filter.topic && !r.issues.includes(filter.topic) && !r.praise.includes(filter.topic)) return false;
       if (search) {
         const hay = `${r.title ?? ""} ${r.liked ?? ""} ${r.disliked ?? ""} ${r.guestName ?? ""} ${r.roomName ?? ""}`.toLowerCase();
@@ -55,11 +60,21 @@ export function ReviewFeed({
     return out.sort((a, b) =>
       sort === "newest" ? b.reviewedAt.localeCompare(a.reviewedAt) : sort === "lowest" ? a.score - b.score || b.reviewedAt.localeCompare(a.reviewedAt) : b.score - a.score || b.reviewedAt.localeCompare(a.reviewedAt),
     );
-  }, [reviews, filter.sentiment, filter.topic, search, sort]);
+  }, [reviews, filter.sentiment, filter.needsReply, filter.topic, search, sort]);
 
   const set = (patch: Partial<FeedFilter>) => {
     setLimit(PAGE);
     onFilter({ ...filter, ...patch });
+  };
+
+  const download = () => {
+    const blob = new Blob([reviewsToCsv(shown)], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `reviews-${period.from}-to-${period.to}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   return (
@@ -71,15 +86,26 @@ export function ReviewFeed({
             {shown.length} of {reviews.length} reviews {period.label}
           </p>
         </div>
+        <div className="flex items-center gap-2">
+        <button
+          type="button"
+          onClick={download}
+          disabled={!shown.length}
+          title="Download the reviews currently shown as a spreadsheet (CSV)"
+          className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50 disabled:opacity-40"
+        >
+          <Download className="size-4" /> CSV
+        </button>
         <label className="relative">
           <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-slate-400" />
           <input
             value={filter.search}
             onChange={(e) => set({ search: e.target.value })}
             placeholder="Search reviews…"
-            className="w-56 rounded-xl border border-slate-200 bg-slate-50 py-2 pr-3 pl-9 text-sm outline-none transition focus:border-azure-400 focus:bg-white focus:ring-4 focus:ring-azure-100"
+            className="w-48 rounded-xl border border-slate-200 bg-slate-50 py-2 pr-3 pl-9 text-sm outline-none transition focus:border-azure-400 focus:bg-white focus:ring-4 focus:ring-azure-100 sm:w-56"
           />
         </label>
+        </div>
       </div>
 
       <div className="mt-4 flex flex-wrap items-center gap-2">
@@ -98,6 +124,18 @@ export function ReviewFeed({
             ),
           }))}
         />
+        <button
+          type="button"
+          onClick={() => set({ needsReply: !filter.needsReply })}
+          title="Negative reviews the hotel hasn't replied to on Booking.com"
+          className={clsx(
+            "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ring-1 transition",
+            filter.needsReply ? "bg-amber-100 text-amber-900 ring-amber-300" : "bg-white text-slate-600 ring-slate-200 hover:bg-amber-50",
+          )}
+        >
+          <MessageSquareWarning className="size-3.5" />
+          Needs reply <span className="tabular opacity-70">{counts.needsReply}</span>
+        </button>
         {filter.topic && (
           <button
             type="button"
@@ -147,8 +185,20 @@ export function ReviewFeed({
   );
 }
 
-function Highlighted({ text, topics, tone, activeTopic }: { text: string; topics: TopicId[]; tone: Sentiment; activeTopic: TopicId | null }) {
-  const parts = highlightTopics(text, topics);
+function Highlighted({
+  text,
+  topics,
+  tone,
+  activeTopic,
+  language,
+}: {
+  text: string;
+  topics: TopicId[];
+  tone: Sentiment;
+  activeTopic: TopicId | null;
+  language: string | null;
+}) {
+  const parts = highlightTopics(text, topics, language);
   return (
     <>
       {parts.map((p, i) =>
@@ -201,8 +251,11 @@ function ReviewCard({ review: r, property, activeTopic }: { review: Review; prop
               {r.guestCountry && ` · ${r.guestCountry}`}
             </span>
             {meta.length > 0 && <span className="text-slate-400">· {meta.join(" · ")}</span>}
-            {r.language && r.language !== "en" && r.language !== "en-gb" && (
-              <span className="inline-flex items-center gap-0.5 rounded bg-slate-100 px-1 text-[10px] font-medium uppercase text-slate-500" title="Not in English — topics may be missed">
+            {!isEnglish(r.language) && (
+              <span
+                className="inline-flex items-center gap-0.5 rounded bg-slate-100 px-1 text-[10px] font-medium uppercase text-slate-500"
+                title="Not written in English. Topics are detected for French, Spanish, German and Italian; other languages may be missed."
+              >
                 <Languages className="size-3" />
                 {r.language}
               </span>
@@ -216,7 +269,7 @@ function ReviewCard({ review: r, property, activeTopic }: { review: Review; prop
           <p className="flex gap-2 text-slate-700">
             <Smile className="mt-0.5 size-4 shrink-0 text-emerald-500" />
             <span>
-              <Highlighted text={r.liked} topics={r.praise} tone="positive" activeTopic={activeTopic} />
+              <Highlighted text={r.liked} topics={r.praise} tone="positive" activeTopic={activeTopic} language={r.language} />
             </span>
           </p>
         )}
@@ -224,7 +277,7 @@ function ReviewCard({ review: r, property, activeTopic }: { review: Review; prop
           <p className="flex gap-2 text-slate-700">
             <Frown className="mt-0.5 size-4 shrink-0 text-rose-500" />
             <span>
-              <Highlighted text={r.disliked} topics={r.issues} tone="negative" activeTopic={activeTopic} />
+              <Highlighted text={r.disliked} topics={r.issues} tone="negative" activeTopic={activeTopic} language={r.language} />
             </span>
           </p>
         )}

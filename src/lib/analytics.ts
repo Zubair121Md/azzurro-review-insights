@@ -1,6 +1,6 @@
 import { addDays, addMonths, daysBetween, formatDay, formatMonth, monthStart, sydneyDay, weekStart } from "./dates";
 import type { PropertyId } from "./properties";
-import { TOPIC_BY_ID, TOPICS, type TopicId } from "./topics";
+import { isEnglish, isTrivial, TOPIC_BY_ID, TOPICS, type TopicId } from "./topics";
 import type { Review } from "./types";
 
 /** Below this many reviews, percentages swing wildly — the UI flags them. */
@@ -232,12 +232,46 @@ export function trend(reviews: Review[], from: string, to: string): { unit: "wee
   };
 }
 
+export interface DataQuality {
+  /** Reviews stored vs the total Booking.com says it has, per property. */
+  coverage: { propertyId: PropertyId; stored: number; listed: number | null }[];
+  /** Share of reviews written in English. */
+  englishShare: number;
+  /** Negative reviews with a written complaint that matched at least one topic, split by language. */
+  topicCoverage: { english: number | null; other: number | null; englishCount: number; otherCount: number };
+  withoutText: number;
+}
+
+export function dataQuality(
+  reviews: Review[],
+  properties: { id: PropertyId; bookingReviewCount: number | null }[],
+): DataQuality {
+  const coverage = properties.map((p) => ({
+    propertyId: p.id,
+    stored: reviews.filter((r) => r.propertyId === p.id).length,
+    listed: p.bookingReviewCount ?? null,
+  }));
+  const english = reviews.filter((r) => isEnglish(r.language));
+  const complaints = reviews.filter((r) => r.sentiment === "negative" && !isTrivial(r.disliked));
+  const en = complaints.filter((r) => isEnglish(r.language));
+  const other = complaints.filter((r) => !isEnglish(r.language));
+  const hit = (rs: Review[]) => (rs.length ? rs.filter((r) => r.issues.length > 0).length / rs.length : null);
+  return {
+    coverage,
+    englishShare: reviews.length ? english.length / reviews.length : 0,
+    topicCoverage: { english: hit(en), other: hit(other), englishCount: en.length, otherCount: other.length },
+    withoutText: reviews.filter((r) => !r.liked && !r.disliked).length,
+  };
+}
+
 export type InsightTone = "good" | "bad" | "neutral" | "warning";
 export interface Insight {
   tone: InsightTone;
   text: string;
   topic?: TopicId;
   propertyId?: PropertyId;
+  /** Links the sentence to the "needs reply" view of the review feed. */
+  needsReply?: boolean;
 }
 
 const pct = (x: number) => `${Math.round(x * 100)}%`;
@@ -298,6 +332,14 @@ export function buildInsights(
         tone: "bad",
         topic: t.id,
         text: `${pct(t.negativeShare!)} of negative reviews ${period.label} mentioned ${TOPIC_BY_ID[t.id].label.toLowerCase()} (${t.negativeMentions} of ${cur.negative})${tail}.`,
+      });
+    }
+    const unanswered = current.filter((r) => r.sentiment === "negative" && !r.hotelReply).length;
+    if (unanswered > 0) {
+      out.push({
+        tone: "warning",
+        needsReply: true,
+        text: `${unanswered} of ${cur.negative} negative review${cur.negative === 1 ? "" : "s"} ${period.label} ${unanswered === 1 ? "has" : "have"} no reply from the hotel on Booking.com yet.`,
       });
     }
   } else {
