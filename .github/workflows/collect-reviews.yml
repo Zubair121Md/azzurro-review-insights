@@ -1,0 +1,54 @@
+name: Collect reviews
+
+# Runs the collector every morning (Sydney time) and commits the refreshed
+# snapshot. If the site is hosted on Vercel/Netlify, the push triggers a redeploy.
+on:
+  schedule:
+    - cron: "0 19 * * *" # 06:00 AEDT / 05:00 AEST
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: collect-reviews
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+
+      # The collector seeds its database from the committed snapshot, so this is
+      # an incremental run. A failure for one property doesn't stop the others,
+      # and whatever was collected is still exported and committed.
+      - name: Collect
+        id: collect
+        run: npm run scrape
+        continue-on-error: true
+
+      - name: Commit refreshed data
+        run: |
+          if git diff --quiet -- public/data data/sample; then
+            echo "No new reviews."
+            exit 0
+          fi
+          git config user.name "review-collector"
+          git config user.email "review-collector@users.noreply.github.com"
+          git add public/data data/sample
+          git commit -m "Update review data $(date -u +%Y-%m-%d)"
+          git push
+
+      - name: Report collection problems
+        if: steps.collect.outcome == 'failure'
+        run: |
+          echo "::warning::One or more properties failed to collect. See the Collect step log (blocked by Booking.com or the page layout changed)."
+          exit 1

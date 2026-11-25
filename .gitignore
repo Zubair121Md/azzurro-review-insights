@@ -1,0 +1,33 @@
+# dependencies
+/node_modules
+
+# testing
+/coverage
+/test-results
+
+# next.js
+/.next/
+/out/
+next-env.d.ts
+*.tsbuildinfo
+
+# local review database (the exported snapshot in public/data is committed instead)
+/data/*.db
+/data/*.db-*
+
+# misc
+.DS_Store
+*.pem
+npm-debug.log*
+
+# env files
+.env*
+
+# vercel
+.vercel
+
+# editor / tooling
+.vscode/
+.idea/
+AGENTS.md
+CLAUDE.md

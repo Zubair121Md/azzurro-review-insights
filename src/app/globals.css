@@ -1,0 +1,66 @@
+@import "tailwindcss";
+
+@theme inline {
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+
+  --color-ink-950: #06142b;
+  --color-ink-900: #0a1f3f;
+  --color-ink-800: #12305c;
+  --color-azure-50: #eef7ff;
+  --color-azure-100: #d9edff;
+  --color-azure-400: #4fb3ff;
+  --color-azure-500: #1f95f5;
+  --color-azure-600: #0b76d1;
+}
+
+:root {
+  color-scheme: light;
+}
+
+body {
+  @apply bg-slate-50 text-slate-900 antialiased;
+  font-feature-settings: "cv11", "ss01";
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+.card {
+  @apply rounded-2xl border border-slate-200/80 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04),0_8px_24px_-12px_rgba(15,23,42,0.08)];
+}
+
+.glass {
+  @apply rounded-2xl border border-white/10 bg-white/[0.06] backdrop-blur-md;
+}
+
+.hero-bg {
+  background:
+    radial-gradient(1200px 400px at 85% -10%, rgba(31, 149, 245, 0.35), transparent 60%),
+    radial-gradient(800px 300px at 0% 0%, rgba(99, 102, 241, 0.25), transparent 60%),
+    linear-gradient(180deg, #06142b 0%, #0a1f3f 100%);
+}
+
+.scrollbar-thin {
+  scrollbar-width: thin;
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+.skeleton {
+  @apply relative overflow-hidden rounded-xl bg-slate-200/70;
+}
+.skeleton::after {
+  content: "";
+  @apply absolute inset-0 -translate-x-full;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+  animation: shimmer 1.4s infinite;
+}
+
+mark.topic {
+  @apply rounded px-0.5 text-inherit;
+}

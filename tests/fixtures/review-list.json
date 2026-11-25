@@ -1,0 +1,336 @@
+{
+ "data": {
+  "reviewListFrontend": {
+   "reviewsCount": 129,
+   "ratingScores": [
+    {
+     "__typename": "RatingScore",
+     "count": 122,
+     "name": "hotel_staff",
+     "value": 7.6838641166687,
+     "ufiScoresAverage": {
+      "ufiScoreLowerBound": 7.54449987411499,
+      "ufiScoreHigherBound": 9.58612537384033,
+      "__typename": "UfiScoreAverage"
+     },
+     "translation": "Staff"
+    },
+    {
+     "value": 6.32368040084839,
+     "ufiScoresAverage": {
+      "__typename": "UfiScoreAverage",
+      "ufiScoreLowerBound": 7.14520025253296,
+      "ufiScoreHigherBound": 9.36305046081543
+     },
+     "translation": "Facilities",
+     "__typename": "RatingScore",
+     "count": 123,
+     "name": "hotel_services"
+    },
+    {
+     "__typename": "RatingScore",
+     "count": 123,
+     "name": "hotel_clean",
+     "value": 6.84748411178589,
+     "ufiScoresAverage": {
+      "ufiScoreHigherBound": 9.51627540588379,
+      "ufiScoreLowerBound": 7.36985015869141,
+      "__typename": "UfiScoreAverage"
+     },
+     "translation": "Cleanliness"
+    },
+    {
+     "name": "hotel_comfort",
+     "count": 123,
+     "__typename": "RatingScore",
+     "translation": "Comfort",
+     "ufiScoresAverage": {
+      "__typename": "UfiScoreAverage",
+      "ufiScoreHigherBound": 9.51885032653809,
+      "ufiScoreLowerBound": 7.38702487945557
+     },
+     "value": 7.01523876190186
+    },
+    {
+     "count": 122,
+     "name": "hotel_value",
+     "__typename": "RatingScore",
+     "ufiScoresAverage": {
+      "ufiScoreLowerBound": 7.18457508087158,
+      "ufiScoreHigherBound": 9.16757488250732,
+      "__typename": "UfiScoreAverage"
+     },
+     "translation": "Value for money",
+     "value": 6.93874263763428
+    },
+    {
+     "__typename": "RatingScore",
+     "count": 121,
+     "name": "hotel_location",
+     "value": 8.30245208740234,
+     "ufiScoresAverage": {
+      "__typename": "UfiScoreAverage",
+      "ufiScoreHigherBound": 9.90662574768066,
+      "ufiScoreLowerBound": 8.33104991912842
+     },
+     "translation": "Location"
+    },
+    {
+     "value": 8.33333396911621,
+     "ufiScoresAverage": {
+      "__typename": "UfiScoreAverage",
+      "ufiScoreHigherBound": 9.074049949646,
+      "ufiScoreLowerBound": 7.67425012588501
+     },
+     "translation": "Free WiFi",
+     "__typename": "RatingScore",
+     "count": 3,
+     "name": "hotel_free_wifi"
+    }
+   ],
+   "reviewCard": [
+    {
+     "guestDetails": {
+      "showCountryFlag": true,
+      "guestTypeTranslation": "Couple",
+      "avatarColor": null,
+      "__typename": "GuestDetails",
+      "countryName": "Australia",
+      "avatarUrl": null,
+      "username": "Alex",
+      "anonymous": false,
+      "countryCode": "au"
+     },
+     "isTranslatable": false,
+     "__typename": "ReviewCard",
+     "reviewedDate": 1795579678,
+     "textDetails": {
+      "lang": "en",
+      "textTrivialFlag": 0,
+      "positiveText": "Great location",
+      "__typename": "TextDetails",
+      "negativeText": "Aircon very loud. Difficulty accessing building.",
+      "title": "Good location, expensive for what it is, check in outsourced overseas."
+     },
+     "photos": null,
+     "reviewScore": 5.0,
+     "partnerReply": null,
+     "isApproved": true,
+     "helpfulVotesCount": 0,
+     "bookingDetails": {
+      "customerType": "COUPLES",
+      "__typename": "BookingDetails",
+      "checkoutDate": "2026-11-22",
+      "roomType": {
+       "__typename": "RoomTranslation",
+       "id": "1621129101",
+       "name": "Superior Double Room (Ensuite)"
+      },
+      "numNights": 1,
+      "stayStatus": "stayed",
+      "checkinDate": "2026-11-21",
+      "roomId": 1621129101
+     },
+     "editUrl": null,
+     "canChangeVote": false,
+     "positiveHighlights": null,
+     "reviewUrl": "d8a6245d924d80b7",
+     "negativeHighlights": null
+    },
+    {
+     "textDetails": {
+      "negativeText": "It was strange to be greeted by zoom call, and my room had no drinking glasses. There werent many food options nearby, and it wasnt that close to the city. It was originally booked for a concert that got cancelled, if the concert had happened it would have been a convenient location.",
+      "title": "Decent enough",
+      "lang": "en",
+      "textTrivialFlag": 0,
+      "positiveText": "It was a good room for a one night single person stay, it was clean and quiet, and easy to find, bed was pretty comfy.",
+      "__typename": "TextDetails"
+     },
+     "reviewedDate": 1794982908,
+     "photos": null,
+     "partnerReply": null,
+     "reviewScore": 6.0,
+     "isApproved": true,
+     "helpfulVotesCount": 0,
+     "bookingDetails": {
+      "roomType": {
+       "id": "1621129103",
+       "name": "Standard Double Room with Private External Bathroom",
+       "__typename": "RoomTranslation"
+      },
+      "checkoutDate": "2026-11-14",
+      "__typename": "BookingDetails",
+      "customerType": "SOLO_TRAVELLERS",
+      "roomId": 1621129103,
+      "checkinDate": "2026-11-13",
+      "stayStatus": "stayed",
+      "numNights": 1
+     },
+     "editUrl": null,
+     "guestDetails": {
+      "username": "Sam",
+      "anonymous": false,
+      "countryCode": "au",
+      "guestTypeTranslation": "Solo traveller",
+      "showCountryFlag": true,
+      "countryName": "Australia",
+      "__typename": "GuestDetails",
+      "avatarColor": null,
+      "avatarUrl": null
+     },
+     "isTranslatable": false,
+     "__typename": "ReviewCard",
+     "reviewUrl": "d5574e207ff40eef",
+     "negativeHighlights": null,
+     "canChangeVote": false,
+     "positiveHighlights": null
+    },
+    {
+     "reviewUrl": "62d85e66efe4a6f4",
+     "negativeHighlights": null,
+     "canChangeVote": false,
+     "positiveHighlights": null,
+     "photos": null,
+     "partnerReply": null,
+     "reviewScore": 5.0,
+     "reviewedDate": 1794112619,
+     "textDetails": {
+      "title": "Easy and close for us to attend bands at the Horden",
+      "negativeText": null,
+      "__typename": "TextDetails",
+      "lang": "en",
+      "positiveText": "Helpful staff",
+      "textTrivialFlag": 0
+     },
+     "editUrl": null,
+     "helpfulVotesCount": 0,
+     "isApproved": true,
+     "bookingDetails": {
+      "roomType": {
+       "name": "Standard Double Room with Private External Bathroom",
+       "id": "1621129103",
+       "__typename": "RoomTranslation"
+      },
+      "__typename": "BookingDetails",
+      "customerType": "COUPLES",
+      "checkoutDate": "2026-11-08",
+      "roomId": 1621129103,
+      "numNights": 1,
+      "checkinDate": "2026-11-07",
+      "stayStatus": "stayed"
+     },
+     "guestDetails": {
+      "avatarUrl": null,
+      "avatarColor": null,
+      "__typename": "GuestDetails",
+      "countryName": "Australia",
+      "showCountryFlag": true,
+      "guestTypeTranslation": "Couple",
+      "countryCode": "au",
+      "anonymous": false,
+      "username": "Jordan"
+     },
+     "isTranslatable": false,
+     "__typename": "ReviewCard"
+    },
+    {
+     "canChangeVote": false,
+     "positiveHighlights": null,
+     "negativeHighlights": null,
+     "reviewUrl": "25809af2f983576e",
+     "isTranslatable": false,
+     "__typename": "ReviewCard",
+     "guestDetails": {
+      "username": "Taylor",
+      "anonymous": false,
+      "countryCode": "de",
+      "showCountryFlag": true,
+      "guestTypeTranslation": "Solo traveller",
+      "countryName": "Germany",
+      "__typename": "GuestDetails",
+      "avatarColor": null,
+      "avatarUrl": null
+     },
+     "editUrl": null,
+     "isApproved": true,
+     "helpfulVotesCount": 0,
+     "bookingDetails": {
+      "roomType": {
+       "name": "Standard Double Room with Private External Bathroom",
+       "id": "1621129103",
+       "__typename": "RoomTranslation"
+      },
+      "__typename": "BookingDetails",
+      "customerType": "SOLO_TRAVELLERS",
+      "checkoutDate": "2026-10-14",
+      "roomId": 1621129103,
+      "numNights": 2,
+      "stayStatus": "stayed",
+      "checkinDate": "2026-10-12"
+     },
+     "photos": null,
+     "partnerReply": null,
+     "reviewScore": 6.0,
+     "textDetails": {
+      "title": "It\u2019s a budget stay so it\u2019s ok but not really well taken care of",
+      "negativeText": "The bathrooms weren\u2019t cleaned at all during my stay",
+      "__typename": "TextDetails",
+      "positiveText": "The location is good and the room is ok",
+      "lang": "en",
+      "textTrivialFlag": 0
+     },
+     "reviewedDate": 1793224141
+    },
+    {
+     "guestDetails": {
+      "showCountryFlag": true,
+      "guestTypeTranslation": "Couple",
+      "avatarColor": null,
+      "__typename": "GuestDetails",
+      "countryName": "Australia",
+      "avatarUrl": null,
+      "username": "Alex",
+      "anonymous": false,
+      "countryCode": "au"
+     },
+     "isTranslatable": false,
+     "__typename": "ReviewCard",
+     "reviewedDate": 1795579678,
+     "textDetails": {
+      "lang": "en",
+      "textTrivialFlag": 0,
+      "positiveText": "Great location",
+      "__typename": "TextDetails",
+      "negativeText": "Aircon very loud. Difficulty accessing building.",
+      "title": "Good location, expensive for what it is, check in outsourced overseas."
+     },
+     "photos": null,
+     "reviewScore": null,
+     "partnerReply": null,
+     "isApproved": true,
+     "helpfulVotesCount": 0,
+     "bookingDetails": {
+      "customerType": "COUPLES",
+      "__typename": "BookingDetails",
+      "checkoutDate": "2026-11-22",
+      "roomType": {
+       "__typename": "RoomTranslation",
+       "id": "1621129101",
+       "name": "Superior Double Room (Ensuite)"
+      },
+      "numNights": 1,
+      "stayStatus": "stayed",
+      "checkinDate": "2026-11-21",
+      "roomId": 1621129101
+     },
+     "editUrl": null,
+     "canChangeVote": false,
+     "positiveHighlights": null,
+     "reviewUrl": "broken000000",
+     "negativeHighlights": null
+    }
+   ],
+   "__typename": "ReviewListFrontendResult"
+  }
+ }
+}

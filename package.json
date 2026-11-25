@@ -1,0 +1,44 @@
+{
+  "name": "azzurro-review-insights",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Collects Booking.com reviews for Azzurro properties and turns them into a weekly ops dashboard.",
+  "engines": {
+    "node": ">=22.13"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "scrape": "node --disable-warning=ExperimentalWarning --import tsx scraper/scrape.ts",
+    "scrape:full": "npm run scrape -- --full",
+    "export": "node --disable-warning=ExperimentalWarning --import tsx scraper/export-cli.ts",
+    "setup:browser": "playwright install chromium"
+  },
+  "dependencies": {
+    "clsx": "^2.1.1",
+    "date-fns": "^4.4.0",
+    "lucide-react": "^1.80.0",
+    "next": "16.4.6",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "recharts": "^3.11.1",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@tailwindcss/turbopack": "4.3.3",
+    "@types/node": "^24.19.4",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.4.6",
+    "playwright": "^1.65.1",
+    "tailwindcss": "4.3.3",
+    "tsx": "^4.23.15",
+    "typescript": "^5",
+    "vitest": "^5.1.1"
+  }
+}
